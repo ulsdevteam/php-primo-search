@@ -110,4 +110,25 @@ class PrimoSpec extends ObjectBehavior
         $this->setJwtToken('test456');
         $this->getJwtToken()->shouldBe('test456');
     }
+
+    function it_can_get_public_key()
+    {
+        $this->initWithResponses([
+            new Response(200, [], 'myPublicKey'),
+        ]);
+
+        $this->getPublicKey()->shouldBe('myPublicKey');
+    }
+
+    function it_can_be_configured_with_public_key()
+    {
+        $this->beConstructedWith([
+            'apiKey' => 'magic key!',
+            'region' => 'eu',
+            'vid' => 'UIO',
+            'scope' => 'default_scope',
+            'publicKey' => 'ourPublicKey'
+        ]);
+        $this->getPublicKey()->shouldBe('ourPublicKey');
+    }
 }

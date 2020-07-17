@@ -20,6 +20,7 @@ class Primo
     // For hosted setup
     protected $apiKey;
     protected $region;
+    protected $publicKey;
 
     // For on-premises setup
     protected $baseUrl;
@@ -41,6 +42,10 @@ class Primo
     ) {
         $this->vid = $config['vid'];
         $this->scope = $config['scope'];
+
+        if (isset($config['publicKey'])) {
+            $this->publicKey = $config['publicKey'];
+        }
 
         if (isset($config['apiKey'])) {
             // Hosted
@@ -86,6 +91,38 @@ class Primo
 
         return $this;
     }
+
+    /**
+     * Get the JWT public key, preferred cached.
+     *
+     * @param $cached bool
+     * @return string
+     */
+    public function getPublicKey(bool $cached = true)
+    {
+        if (!$cached || !isset($this->publicKey)) {
+            $this->cachePublicKey();
+        }
+
+        return $this->publicKey;
+    }
+
+    /**
+     * Cache the JWT public key, fetched via the API
+     */
+    protected function cachePublicKey()
+    {
+        $pubKey = '';
+        $res = $this->request("{$this->baseUrl}/instPublicKey");
+        $pubKey = trim($res, '"');
+        // This string may be returned with a 200
+        if ($pubKey === 'The institution doesn\'t exist or the public key wasn\'t created') {
+            $pubKey = '';
+        }
+       
+        $this->publicKey = $pubKey;
+    }
+
 
     protected function getGuestJwtToken()
     {
